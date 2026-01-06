@@ -22,21 +22,10 @@ RUN ./node_modules/.bin/prisma generate
 FROM base AS builder
 WORKDIR /app
 
-# Accept DATABASE_URL as build argument for migrations
-ARG DATABASE_URL
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Run migrations if DATABASE_URL is provided
-RUN if [ -n "$DATABASE_URL" ] && [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then \
-      echo "Running Prisma migrations..." && \
-      ./node_modules/.bin/prisma migrate deploy; \
-    else \
-      echo "Skipping migrations (no DATABASE_URL or no migrations)"; \
-    fi
-
-# Build the application
+# Build the application (no migrations during build - they run at startup)
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -59,9 +48,20 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Copy Prisma client only
+# Copy Prisma client for runtime
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copy Prisma CLI and its dependencies for migrations at startup
+COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
+COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+
+# Copy prisma folder with schema and migrations
+COPY --from=builder /app/prisma ./prisma
+
+# Copy startup script
+COPY --from=builder /app/start.sh ./start.sh
+RUN chmod +x ./start.sh
 
 USER nextjs
 
@@ -69,4 +69,5 @@ EXPOSE 3000
 
 ENV PORT=3000
 
-CMD ["node", "server.js"]
+# Run migrations at startup, then start the server
+CMD ["./start.sh"]
