@@ -48,10 +48,8 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Copy ALL Prisma packages from deps (with all WASM files intact)
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
+# Copy full node_modules for Prisma CLI migrations (effect, @prisma/config, etc.)
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copy prisma folder with schema and migrations
 COPY --from=builder /app/prisma ./prisma
