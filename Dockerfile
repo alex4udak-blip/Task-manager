@@ -16,7 +16,7 @@ COPY prisma ./prisma/
 RUN npm ci
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN ./node_modules/.bin/prisma generate
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -33,6 +33,7 @@ RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -49,6 +50,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 USER nextjs
 
@@ -56,5 +58,5 @@ EXPOSE 3000
 
 ENV PORT=3000
 
-# Run prisma migrate and start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Run prisma migrate using local version and start the server
+CMD ["sh", "-c", "./node_modules/prisma/build/index.js migrate deploy && node server.js"]
