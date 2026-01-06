@@ -6,7 +6,7 @@ echo "=== TaskFlow Startup ==="
 # Run database migrations
 if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
     echo "Running Prisma migrations..."
-    ./node_modules/.bin/prisma migrate deploy
+    node node_modules/prisma/build/index.js migrate deploy
     echo "Migrations completed successfully!"
 else
     echo "No migrations found, skipping..."
