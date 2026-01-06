@@ -22,8 +22,19 @@ RUN ./node_modules/.bin/prisma generate
 FROM base AS builder
 WORKDIR /app
 
+# Accept DATABASE_URL as build argument for migrations
+ARG DATABASE_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Run migrations if DATABASE_URL is provided
+RUN if [ -n "$DATABASE_URL" ] && [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then \
+      echo "Running Prisma migrations..." && \
+      ./node_modules/.bin/prisma migrate deploy; \
+    else \
+      echo "Skipping migrations (no DATABASE_URL or no migrations)"; \
+    fi
 
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -48,7 +59,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Copy Prisma client only (not CLI - migrations should be run separately)
+# Copy Prisma client only
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
@@ -58,5 +69,4 @@ EXPOSE 3000
 
 ENV PORT=3000
 
-# Start the server (run migrations separately via Railway console: npx prisma migrate deploy)
 CMD ["node", "server.js"]
