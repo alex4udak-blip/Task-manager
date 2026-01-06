@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,54 +43,55 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-white">Sign in</CardTitle>
-        <CardDescription className="text-zinc-400">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white mb-2">Sign in</h1>
+        <p className="text-zinc-400 text-sm">
           Enter your email and password to access your account
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-400 bg-red-900/20 border border-red-900 rounded-md">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-zinc-300">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-              className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
-            />
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="p-3 text-sm text-red-400 bg-red-900/20 border border-red-900 rounded-md">
+            {error}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-zinc-300">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="bg-zinc-800 border-zinc-700 text-white"
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
-          </Button>
-          <p className="text-sm text-zinc-400">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-violet-400 hover:text-violet-300">
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-zinc-300">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-zinc-300">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+        </div>
+
+        <Button type="submit" className="w-full mt-6" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </Button>
+
+        <p className="text-sm text-zinc-400 text-center pt-2">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-violet-400 hover:text-violet-300">
+            Sign up
+          </Link>
+        </p>
       </form>
-    </Card>
+    </div>
   );
 }
