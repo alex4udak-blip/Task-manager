@@ -5,10 +5,10 @@ nixPkgs = ["nodejs_20", "npm-10_x", "openssl"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm install", "npx prisma generate", "npm run build"]
+cmds = ["./node_modules/.bin/prisma generate", "npm run build"]
 
 [start]
-cmd = "npx prisma migrate deploy && node .next/standalone/server.js"
+cmd = "node .next/standalone/server.js"
 
 [variables]
 NODE_ENV = "production"
